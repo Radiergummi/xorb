@@ -49,20 +49,29 @@ app.loadModule = function(name, instance, init) {
 
 
 /**
- * creates a reference to a module directly within the app, which is useful
- * to avoid having to call long module paths (app.module instead of 
- * app.modules.example.module)
+ * creates a reference to a module method directly within the app, which is useful
+ * to avoid having to call long module paths (app.methodName instead of 
+ * app.modules.example.module.methodName)
  *
- * @param {string} name  	 the modules name to mount under
- * @param {object} instance  the module instance to mount
+ * @param {string} mountpoint  the mount point name
+ * @param {object} module      the module instance to mount
+ * @param {*} [property]      the module property to mount. optional.
  */
-app.mountModule = function(name) {
+app.mountModuleEndpoint = function(mountpoint, module, property) {
   if (! app.modules.hasOwnProperty([name])) {
     return console.error('[init] ' + name + ' could not be mounted: There is no module registered by that name.');
   }
+  
+  if (property && ! app.modules[name].hasOwnProperty(property)) {
+    return console.error('[init] ' + name + '.' + property ' could not be mounted: The module has no property by that name.');
+  }
 
 	if (! app.hasOwnProperty(name)) {
-		return app[name] = app.modules[name];
+	  if (! property) {
+		  return app[name] = app.modules[name][property];
+	  }
+	  
+	  return app[name] = app.modules[name];
 	}
 
 	return console.error('[init] ' + name + ' could not be mounted: A module of that name is already mounted.');
