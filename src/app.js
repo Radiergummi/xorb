@@ -164,9 +164,10 @@ app.determineNamespaceCallbacks = function() {
 
 /**
  * runs the app by executing all callbacks in the current namespace
- * stack. the next callback must be called from within the current
- * callback. if any callback returns an error, it is being collected
- * and thrown at the end of execution stack.
+ * stack. the next callback can be called from within the current
+ * callback to return prematurely and/or to hand over data to the 
+ * next callback. if any callback returns an error, it is being 
+ * collected and thrown at the end of execution stack.
  * Callbacks are executed in the order they are registered.
  */
 app.run = function() {
@@ -199,7 +200,10 @@ app.run = function() {
     app.ns.current[i].call(window, app, error, runNext, data);
   }
   
-  runNext();
+  // as long as we have callbacks, execute them
+  while (i < app.ns.current.length - 1) {
+    runNext();
+  }
 };
 
 app.init = function() {
