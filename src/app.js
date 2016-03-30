@@ -54,27 +54,27 @@ app.loadModule = function(name, instance, init) {
  * app.modules.example.module.methodName)
  *
  * @param {string} mountpoint  the mount point name
- * @param {object} module      the module instance to mount
- * @param {*} [property]      the module property to mount. optional.
+ * @param {string} module      the module instance to mount
+ * @param {string} [property]  the module property to mount. optional.
  */
 app.mountModuleEndpoint = function(mountpoint, module, property) {
-  if (! app.modules.hasOwnProperty([name])) {
-    return console.error('[init] ' + name + ' could not be mounted: There is no module registered by that name.');
+  if (! app.modules.hasOwnProperty([mountpoint])) {
+    return console.error('[init] ' + module + ' could not be mounted: There is no module registered by that name.');
   }
   
-  if (property && ! app.modules[name].hasOwnProperty(property)) {
-    return console.error('[init] ' + name + '.' + property ' could not be mounted: The module has no property by that name.');
+  if (property && ! app.modules[module].hasOwnProperty(property)) {
+    return console.error('[init] ' + module + '.' + property ' could not be mounted: The module has no property by that name.');
   }
 
-	if (! app.hasOwnProperty(name)) {
+	if (! app.hasOwnProperty(mountpoint)) {
 	  if (! property) {
-		  return app[name] = app.modules[name][property];
+		  return app[mountpoint] = app.modules[module][property];
 	  }
 	  
-	  return app[name] = app.modules[name];
+	  return app[mountpoint] = app.modules[module];
 	}
 
-	return console.error('[init] ' + name + ' could not be mounted: A module of that name is already mounted.');
+	return console.error('[init] ' + module + ' could not be mounted: A module of that name is already mounted.');
 }
 
 
