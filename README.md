@@ -16,6 +16,14 @@ To use Xorb, include `app.js` in your HTML file:
 
 ````html
 <script src="/js/app.js"></script>
+<script>
+  /**
+   * namespace and module definitions here
+   */
+
+  // initialize the app and run your code
+  app.init();
+</script>
 ````
 
 ### Namespaces
