@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * the global app variable, exposed as window.app
  * 
@@ -36,7 +34,7 @@ app.modules = {};
 app.loadModule = function(name, instance, init) {
   if (! app.modules.hasOwnProperty(name)) {
     app.modules[name] = instance;
-    
+	
     if (init) {
       return init.call(app);
     }
@@ -44,8 +42,8 @@ app.loadModule = function(name, instance, init) {
     console.error('[init] ' + name + ' could not be loaded: A module of that name is already loaded.');
   }
   
-  return app.modules[name]
-}
+  return app.modules[name];
+};
 
 
 /**
@@ -58,24 +56,28 @@ app.loadModule = function(name, instance, init) {
  * @param {string} [property]  the module property to mount. optional.
  */
 app.mountModuleEndpoint = function(mountpoint, module, property) {
-  if (! app.modules.hasOwnProperty([mountpoint])) {
-    return console.error('[init] ' + module + ' could not be mounted: There is no module registered by that name.');
+  if (! app.modules.hasOwnProperty([module])) {
+    return console.error('[init] ' + module + ' could not be mounted at ' + mountpoint + ': There is no module registered by that name.');
   }
   
   if (property && ! app.modules[module].hasOwnProperty(property)) {
-    return console.error('[init] ' + module + '.' + property ' could not be mounted: The module has no property by that name.');
+    return console.error('[init] ' + module + '.' + property + ' could not be mounted at ' + mountpoint + ': The module has no property by that name.');
   }
 
 	if (! app.hasOwnProperty(mountpoint)) {
 	  if (! property) {
-		  return app[mountpoint] = app.modules[module][property];
+		  return app[mountpoint] = function() {
+        return app.modules[module].apply(app.modules[module], arguments);
+      }
 	  }
 	  
-	  return app[mountpoint] = app.modules[module];
+	  return app[mountpoint] = function() { 
+      return app.modules[module][property].apply(app.modules[module], arguments);
+    }
 	}
 
-	return console.error('[init] ' + module + ' could not be mounted: A module of that name is already mounted.');
-}
+	return console.error('[init] ' + module + ' could not be mounted at ' + mountpoint + ': A module of that name is already mounted.');
+};
 
 
 /**
@@ -169,36 +171,36 @@ app.determineNamespaceCallbacks = function() {
  */
 app.run = function() {
   var i = -1,
-  	  errors = [],
-  	  next = null;
+      errors = [],
+      next = null;
   
   // push a final callback to the stack which ends the loop
   app.ns.current.push(function(app, error, next) {
-  
-  	// if we have any errors, throw the first one.
-  	// TODO: Maybe this should be catched somewhere higher up.
-  	if (errors.length) {
-  		throw errors[ 0 ];
-  	}
+    
+    // if we have any errors, throw the first one.
+    // TODO: Maybe this should be catched somewhere higher up.
+    if (errors.length) {
+      throw errors[ 0 ];
+    }
   });
 
   function runNext(error, data) {
-  	// if we have any errors, collect them
-  	if (error) {
-  		errors.push(error)
-  	}
-  
-  	data = data || false;
-  
-  	// add 1 to callback counter
-  	i++;
-  
-  	// call the callback in the window scope, using app, error and next as their callbacks
-  	app.ns.current[i].call(window, app, error, runNext, data);
+    // if we have any errors, collect them
+    if (error) {
+      errors.push(error)
+    }
+    
+    data = data || false;
+    
+    // add 1 to callback counter
+    i++;
+    
+    // call the callback in the window scope, using app, error and next as their callbacks
+    app.ns.current[i].call(window, app, error, runNext, data);
   }
   
   runNext();
-}
+};
 
 app.init = function() {
   
@@ -208,4 +210,4 @@ app.init = function() {
   
   // run the app once the DOM has finished loading
   document.addEventListener('DOMContentLoaded', app.run, false);
-}
+};
