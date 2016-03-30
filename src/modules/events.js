@@ -109,7 +109,7 @@
    *
    * @return {array}  the list of events
    */
-  getEvents: function () {
+  getEvents = function () {
     var events = [];
 
     for (var event in this.events) {
