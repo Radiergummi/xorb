@@ -29,7 +29,7 @@
    */
   eventModule.on = function(type, callback) {
     // if there is no callback registered for this event yet, create an array for this event
-    if (! this.stack.hasOwnProperty(type)) {
+    if (! this.events.hasOwnProperty(type)) {
       this.events[ type ] = [];
     }
 
@@ -96,7 +96,7 @@
 
     // iterate over all callbacks, run them as expected
     for (var i = 0; i < this.events[ type ].length; i++) {
-        this.events[ type ][ i ].call(context, type, data);
+      this.events[ type ][ i ].call(context, type, data);
     }
 
     return true;
