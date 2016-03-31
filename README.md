@@ -113,7 +113,7 @@ The module container. Holds all loaded modules with the specified name as the ke
 The current browser page path (equivalent to `window.location.href`). Will change soon to enable the use of regular expressions (for example `^` or `$`) and placeholders like `:variable` known from other frameworks.
 
 #### Soon to come: `app.history`
-I plan on integrating history.js to provide support for AJAX requests and browser history modification.
+I plan on integrating history.js to provide support for AJAX requests and browser history modification. This is delayed though because I'm trying to find a way to initialize history.js into `app.modules.history` instead of `window.History` without actually modifying its source.
 
 
 ### Namespacing
@@ -130,3 +130,66 @@ If callbacks are registered, they will be executed in the order they have been r
 **data**: A possible data variable passed by the previous callback. Only present if the previous callback used `next(null, data)`.
 You do not have to use any of these.  
 
+### Modules
+#### `app.loadModule({string} name, {object} instance, {function} [init])`
+**name**: the name the module should be available as within the app (eg. `app.modules.<module name>`).  
+**instance**: the module object to load  
+**init**: an option function to run code after the module has been loaded, the perfect place for `app.mountModuleEndpoint()`.
+
+#### `app.mountModuleEndpoint({string} mountPoint, {string} module, {string} [property])`
+**mountPoint**: the exposed property below `app` the module is available on (eg. `app.mySpecialModule` or `app.mySpecialModuleMethod()`)  
+**module**: the module to mount
+**property**: the module property to mount. Optional - if omitted, the whole module will be mounted.
+
+#### Creating a module
+To create a module and make its usage easy, you should create a file named `src/modules/<module name>.js` and include it **after** `app.js`. Within the file, create a new self-executing anonymous function so the module will integrate itself on load:  
+
+````javascript
+(function(app) {
+  if (! app) {
+    return console.error('[modules/mySpecialModule] app.js has not been loaded yet');
+  }
+  
+  // create your module object or hand over your module object
+  var mySpecialModule = {};
+  
+  // ... your module code
+  
+  /**
+   * the important part: writing your loadModule statement. the third 
+   * parameter, the init function, enables you to execute code once your
+   * module has been loaded. Here, you could mount module endpoints as 
+   * described in the code, or setup your basic plugin options etc.
+   * The init function is optional.
+   */
+  app.loadModule('mySpecialModuleName', mySpecialModule, function() {
+  
+    /**
+     * optionally expose the whole module at app.myExposedModule that points
+     * to app.modules.mySpecialModule
+     */
+    app.mountModuleEndpoint('myExposedModule', 'mySpecialModule');
+    
+    /**
+     * optionally expose a single method or property at app.myExposedMethod
+     * that points to app.modules.mySpecialModule.myInternalMethodName
+     */
+    app.mountModuleEndpoint('myExposedMethod', 'mySpecialModule', 'myInternalMethodName');
+  });
+})(window.app);
+````
+  
+  
+So, to give another jQuery example, the following would completely activate jQuery in Xorb:
+
+````javascript
+(function(app, jQuery) {
+  if (! app) {
+    return console.error('[modules/jQuery] app.js has not been loaded yet');
+  }
+  
+  app.loadModule('jQuery', jQuery, function() {
+    app.mountModuleEndpoint('$', 'jQuery');
+  });
+})(window.app, $);
+````
