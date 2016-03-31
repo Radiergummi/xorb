@@ -95,4 +95,38 @@ app.loadModule('events', eventModule, function() {
 });
 ````
 
-This will make the three main event methods, `on`, `off` and `emit`, available as direct descendant properties of `app` so you can use `app.on('test-event', function(event) { /* ... */ })`.
+This will make the three main event methods, `on`, `off` and `emit`, available as direct descendant properties of `app` so you can use `app.on('test-event', function(event) { /* ... */ })`.  
+While you *can* mount modules to specific endpoints, you don't have to. It's completely sufficient to load modules with `app.loadModule('dom', domModule);`. 
+
+
+## API and general structure
+While Xorb *does* have a few important methods, what's more important here is to understand the way a Xorb app works. The main feature is to force you to write better code by making you separate it into route related fragments. 
+
+### `app` properties
+#### `app.ns`
+The app namespace. Every namespace you create will be inserted here, with its name as the key. Additionally, a key named `app.ns.current` will be created that holds all namespace callbacks for the current path.
+
+#### `app.modules`
+The module container. Holds all loaded modules with the specified name as the key.
+
+#### `app.currentPath`
+The current browser page path (equivalent to `window.location.href`). Will change soon to enable the use of regular expressions (for example `^` or `$`) and placeholders like `:variable` known from other frameworks.
+
+#### Soon to come: `app.history`
+I plan on integrating history.js to provide support for AJAX requests and browser history modification.
+
+
+### Namespacing
+#### `app.registerNamespaceAction({string} namespace, {array|function} callbacks)`
+**namespace**: The namespace (route) to register the action for  
+**callbacks**: Either an array of callbacks or a single function  
+
+If callbacks are registered, they will be executed in the order they have been registered when the namespace execution starts later on. Callbacks have to be structured like so:  
+
+##### `function({object} app, {object} error, {function} next, {*} data)`
+**app**: The `app` itself. Currently useless as the app is visible in the global namespace, this may change to better encapsulation soon.  
+**error**: A possible previous error object. This will throw an exception once the namespace callbacks have finished.  
+**next**: The next callback. Allows to return prematurely and pass data to the next callback.  
+**data**: A possible data variable passed by the previous callback. Only present if the previous callback used `next(null, data)`.
+You do not have to use any of these.  
+
