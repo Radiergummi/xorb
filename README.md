@@ -117,7 +117,7 @@ I plan on integrating history.js to provide support for AJAX requests and browse
 
 
 ### Namespacing
-#### `app.registerNamespaceAction({string} namespace, {array|function} callbacks)`
+#### `app.registerNamespaceAction({string} namespace, {Array|function} callbacks)`
 **namespace**: The namespace (route) to register the action for  
 **callbacks**: Either an array of callbacks or a single function  
 
