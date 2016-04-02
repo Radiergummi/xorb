@@ -45,7 +45,7 @@
    * @param {string} type        the event to unsubscribe from
    * @param {function} callback  the event callback to unsubscribe
    *
-   * @return {bool}              whether the callback was removed or not
+   * @return {boolean}           whether the callback was removed or not
    */
   eventModule.off = function(type, callback) {
     // if the event does not exist, return false
@@ -65,7 +65,7 @@
           return item;
         }
       }
-    )
+    );
 
     return true;
   };
@@ -75,12 +75,12 @@
    * emit function.
    * calls all registered callbacks for an event
    * 
-   * @param {string} type      the event to trigger callbacks for
-   * @param {mixed} [data]     optional data to hand over to the callbacks
-   * @param {mixed} [context]  optional context to hand over to the callbacks, 
-   *                           defaults to window
+   * @param {string} type       the event to trigger callbacks for
+   * @param {*}      [data]     optional data to hand over to the callbacks
+   * @param {*}      [context]  optional context to hand over to the callbacks,
+   *                            defaults to window
    * 
-   * @return {bool}            whether the event has been fired
+   * @return {boolean}          whether the event has been fired
    */
   eventModule.emit = function(type, data, context) {
     // use an empty object if no data given
@@ -107,17 +107,19 @@
    * getEvents function.
    * returns all registered events.
    *
-   * @return {array}  the list of events
+   * @return {Array}  the list of events
    */
-  getEvents = function () {
+  eventModule.getEvents = function () {
     var events = [];
 
     for (var event in this.events) {
+      if (! this.events.hasOwnProperty(event)) continue;
+
       events.push(event);
     }
 
     return events;
-  }
+  };
   
   // register the module in the app
   app.loadModule('events', eventModule, function() {

@@ -1,0 +1,12 @@
+{
+  "string": "foo bar, baz!",
+  "numbers": 123567878654523413576876,
+  "array": [
+    "string",
+    123456
+  ],
+  "object": {
+    "string": "test value",
+    "number": 123356
+  }
+}
