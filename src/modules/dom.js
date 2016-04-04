@@ -136,7 +136,7 @@
   
     
   // register the module in the app
-  app.loadModule('dom', domModule, function() {
+  app.registerModule('dom', domModule, function() {
 
     // register event endpoints
     app.mountModuleEndpoint('dom', 'dom');

@@ -122,7 +122,7 @@
   };
   
   // register the module in the app
-  app.loadModule('events', eventModule, function() {
+  app.registerModule('events', eventModule, function() {
 
     // register event endpoints
     app.mountModuleEndpoint('on', 'events', 'on');

@@ -4,17 +4,21 @@
       <meta charset="utf-8">
       <meta http-equiv="x-ua-compatible" content="ie=edge">
       <title></title>
+      <script src="../src/app.js"></script>
+      <script>
+        app.init({
+          basePath: window.location.origin + '/xorb',
+          modules: [
+            'events',
+            'dom',
+            'templates'
+          ]
+        });
+      </script>
     </head>
     <body>
       <div class="hi">
         Hello World!
       </div>
     </body>
-  <script src="../src/app.js"></script>
-  <script src="../src/modules/events.js"></script>
-  <script src="../src/modules/dom.js"></script>
-  <script src="../src/modules/templates.js"></script>
-  <script>
-    app.init();
-  </script>
 </html>

@@ -19,8 +19,20 @@ var app = app || (function() {
     }
 
     /**
+     * the configuration store
+     *
+     * @private
+     * @var {object}
+     */
+    var _options = {
+      basePath: window.location.origin
+
+    };
+
+    /**
      * the namespace container
      *
+     * @private
      * @var {object}
      */
     var _ns = {
@@ -30,10 +42,17 @@ var app = app || (function() {
     /**
      * the modules container
      *
+     * @private
      * @var {object}
      */
     var _modules = {};
 
+    /**
+     * the current browser path
+     *
+     * @private
+     * @var {string}
+     */
     var _currentPath = null;
 
 
@@ -41,8 +60,11 @@ var app = app || (function() {
      * determines the current namespace by trying to match the current pathname
      * on the registered namespaces in the app. Before this function is called,
      * obviously app.ns should be populated with any relevant namespaces.
+     *
+     * @private
+     * @var {function}
      */
-    var _determineNamespaceCallbacks = function() {
+    var _buildNamespace = function() {
       _ns.current = [];
 
       for (var namespace in _ns) {
@@ -70,6 +92,9 @@ var app = app || (function() {
      * callback. if any callback returns an error, it is being collected
      * and thrown at the end of execution stack.
      * Callbacks are executed in the order they are registered.
+     *
+     * @private
+     * @var {function}
      */
     var _run = function() {
       var i      = -1,
@@ -118,7 +143,15 @@ var app = app || (function() {
      * @constructor
      */
     App.prototype.http = (function() {
-      var HTTP     = function() {
+      var _loadedScripts = [],
+          _getLoadedScripts = function() {
+            var scriptTags = document.querySelectorAll('script[src]');
+
+            for (var i = 0; i < scriptTags.length; i++) {
+              _loadedScripts.push(scriptTags[i].src);
+            }
+          },
+          HTTP     = function() {
           },
           _adapter = {},
           _buildURL;
@@ -127,6 +160,7 @@ var app = app || (function() {
       /**
        * method to create a new fetch request and return the results as a promise
        *
+       * @protected
        * @param {object} request
        * @returns {Promise}
        */
@@ -174,6 +208,14 @@ var app = app || (function() {
         });      };
 
 
+      /**
+       * method to create a new fetch request with a data body and return the
+       * results as a promise
+       *
+       * @protected
+       * @param request
+       * @returns {Promise}
+       */
       _adapter.transmit = function(request) {
         /**
          * fetch the request
@@ -224,10 +266,10 @@ var app = app || (function() {
        * creates the request URL by assembling any parameters into a query string
        * and appends it
        *
+       * @private
        * @param url
        * @param params
        * @returns {*}
-       * @private
        */
       _buildURL = function(url, params) {
 
@@ -253,6 +295,7 @@ var app = app || (function() {
        * GET request to the server. Parameters are expanded and attached to the URL string
        * automatically.
        *
+       * @public
        * @param {object|string}  url         URL to resource to GET
        * @param {function}       [callback]  callback to execute once the response has been received
        * @param {object}         [params]    URL parameters (?foo=bar) to attach to this request
@@ -284,6 +327,7 @@ var app = app || (function() {
        * DELETE request to the server. Parameters are expanded and attached to the URL string
        * automatically.
        *
+       * @public
        * @param {string}   url         URL to resource to DELETE
        * @param {function} [callback]  callback to execute once the response has been received
        * @param {object}   [params]    URL parameters (?foo=bar) to attach to this request
@@ -315,6 +359,7 @@ var app = app || (function() {
        * HEAD request to the server. Parameters are expanded and attached to the URL string
        * automatically.
        *
+       * @public
        * @param {string}   url         URL to resource to retrieve headers for
        * @param {function} [callback]  callback to execute once the response has been received
        * @param {object}   [params]    URL parameters (?foo=bar) to attach to this request
@@ -345,6 +390,7 @@ var app = app || (function() {
       /**
        * POST request to the server.
        *
+       * @public
        * @param {string}   url         URL to resource to POST
        * @param {object}   data        body data to attach to this request
        * @param {function} [callback]  callback to execute once the response has been received
@@ -385,6 +431,7 @@ var app = app || (function() {
       /**
        * PUT request to the server.
        *
+       * @public
        * @param {string}   url         URL to resource to PUT
        * @param {object}   data        body data to attach to this request
        * @param {function} [callback]  callback to execute once the response has been received
@@ -425,6 +472,7 @@ var app = app || (function() {
       /**
        * PATCH request to the server.
        *
+       * @public
        * @param {string}   url         URL to resource to PATCH
        * @param {object}   data        body data to attach to this request
        * @param {function} [callback]  callback to execute once the response has been received
@@ -465,6 +513,7 @@ var app = app || (function() {
       /**
        * GET request for a JSON resource that is parsed and handed to the callback
        *
+       * @public
        * @param {object|string}  url         URL to resource to GET
        * @param {function}       [callback]  callback to execute once the response has been received
        * @param {object}         [params]    URL parameters (?foo=bar) to attach to this request
@@ -494,6 +543,16 @@ var app = app || (function() {
       };
 
 
+      /**
+       * GET request for a BLOB resource that is treated as binary content (eg. images)
+       *
+       * @public
+       * @param url
+       * @param callback
+       * @param params
+       * @param headers
+       * @returns {Promise}
+       */
       HTTP.prototype.getBlob = function(url, callback, params, headers) {
         var request = {};
 
@@ -515,23 +574,84 @@ var app = app || (function() {
         }).then(callback);
       };
 
+
+      /**
+       * get a script and append it to the document. Existing scripts will be removed,
+       * appended a no-cache timestamp and reloaded. This method is used internally to
+       * download modules automatically.
+       *
+       * @public
+       * @param {string}   path        the path to the script to load
+       * @param {function} [callback]  an optional callback to execute once the script
+       *                               has been loaded. If an error occurs (think 404)
+       *                               the callback is supplied an error argument as
+       *                               its first parameter.
+       * @returns {undefined}
+       */
+      HTTP.prototype.getScript = function(path, callback) {
+        callback = callback || function() {};
+
+        // if this is not an absolute link, attach our base path
+        if (path.substring(0, 7) !== 'http://' || path.substring(0, 8) !== 'https://') {
+          path = _options.basePath + path;
+        }
+
+        // update the loaded scripts index
+        _getLoadedScripts();
+
+        /**
+         * check if the script to load already has an associated script tag.
+         * if so, remove it and append it again,
+         */
+        if (_loadedScripts.indexOf(path.split('?')[0]) !== -1) {
+
+          // remove the script from the DOM
+          document.querySelector('script[src^="' + path + '"]').remove();
+
+          // update the script path with the current timestamp to circumvent caching
+          path = path + '?d=' + Date.now();
+        }
+
+        var scriptTag = document.createElement('script');
+        scriptTag.src = path;
+
+        document.querySelector('head').appendChild(scriptTag);
+
+        // run the callback if there was an error loading the script, supplement a new Error
+        scriptTag.onerror = function() {
+          var loadError = new Error('Script could not be fetched: ' + path);
+          console.error('[app/http] ' + loadError.message);
+
+          return callback(loadError);
+        };
+
+        // run the callback once the script has been loaded
+        scriptTag.onload = function() {
+          return callback(null);
+        };
+
+        // update the loaded scripts index again (we made changes)
+        _getLoadedScripts();
+      };
+
       // return an instance of the HTTP class
       return new HTTP();
     })();
 
 
     /**
-     * loads a module and stores it in the apps modules object for later use.
+     * mounts a module and stores it in the apps modules object for later use.
      * an optional initialization function can be supplied to setup the module
      * if necessary.
      *
+     * @public
      * @param {string}   name      the module name
      * @param {object}   instance  the  module instance
      * @param {function} [init]    an optional module initialization function
      *
-     * @return {object}            the loaded module
+     * @returns {object}           the loaded module
      */
-    App.prototype.loadModule = function(name, instance, init) {
+    App.prototype.registerModule = function(name, instance, init) {
       if (!_modules.hasOwnProperty(name)) {
         _modules[ name ] = instance;
 
@@ -551,9 +671,11 @@ var app = app || (function() {
      * to avoid having to call long module paths (app.methodName instead of
      * app.modules.example.module.methodName)
      *
+     * @public
      * @param {string} mountpoint  the mount point name
      * @param {string} module      the module instance to mount
      * @param {string} [property]  the module property to mount. optional.
+     * @returns {*}
      */
     App.prototype.mountModuleEndpoint = function(mountpoint, module, property) {
       if (!_modules.hasOwnProperty(module)) {
@@ -585,11 +707,13 @@ var app = app || (function() {
      * fragment, starting from the left. Callbacks can be an array containing
      * multiple callbacks or a single function.
      *
-     * @param {string}         namespace
+     * @public
+     * @param {string}         namespace  the namespace to mount the action on
      * @param {Array|function} callbacks  the callback(s) to execute on this
      *                                    mount point
+     * @returns {undefined}
      */
-    App.prototype.registerNamespaceAction = function(namespace, callbacks) {
+    App.prototype.namespace = function(namespace, callbacks) {
       if (!_ns.hasOwnProperty(namespace)) {
         _ns[ namespace ] = [];
       }
@@ -634,16 +758,35 @@ var app = app || (function() {
 
     /**
      * initializes the app
+     *
+     * @public
+     * @param {object} [options]  configuration options to start the app with
+     * @returns {App}
      */
-    App.prototype.init = function() {
+    App.prototype.init = function(options) {
+
+      // merge options
+      for (var option in options) {
+        if (! options.hasOwnProperty(option)) continue;
+
+        _options[option] = options[option];
+      }
 
       // the current application path
       _currentPath = window.location.pathname;
-      _determineNamespaceCallbacks();
+      _buildNamespace();
+
+      // if we have any modules to load, do so now
+      if (_options.modules.length > 0) {
+        for (var i = 0; i < _options.modules.length; i++) {
+          this.http.getScript('/src/modules/' + _options.modules[i] + '.js');
+        }
+      }
 
       // run the app once the DOM has finished loading
       document.addEventListener('DOMContentLoaded', _run, false);
     };
 
+    // return the core app object
     return new App();
   })();
