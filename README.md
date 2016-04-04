@@ -74,7 +74,7 @@ What is more important, though: You can specify as many callbacks for a certain 
 
 
 ### Modules
-When I say modules, I mean encapsuled objects serving some purpose. That can be jQuery, a function or a fully-fledged custom module of your choice. You don't need to make any changes to these pieces of code to make them work with Xorb. You'll need to write a quick import wrapper for them, though:
+When I say modules, I mean encapsulated objects serving some purpose. That can be jQuery, a function or a fully-fledged custom module of your choice. You don't need to make any changes to these pieces of code to make them work with Xorb. You'll need to write a quick import wrapper for them, though:
 
 ````javascript
 app.loadModule('jQuery', $, function() {
