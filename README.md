@@ -99,6 +99,25 @@ This will make the three main event methods, `on`, `off` and `emit`, available a
 While you *can* mount modules to specific endpoints, you don't have to. It's completely sufficient to load modules with `app.loadModule('dom', domModule);`. 
 
 
+### HTTP requests
+Xorb includes a wrapper for AJAX/Fetch calls. This serves the main purpose of unifying the access to server resources from modules or namespace actions. The HTTP API is using promises, which makes working with responses really easy:
+
+````javascript
+
+// perform a GET request
+app.http.get('/templates/user/edit')
+
+  // render the downloaded template
+  .then(app.render)
+	
+  // insert the rendered template into the DOM
+  .then(function(renderedTemplate) {
+    app.dom.el('.edit-user').innerHTML = renderedTemplate;
+  });
+````
+
+*Note: This shows the `app.render` method which is a part of the templates module that I'll be uploading soon - it's still being worked on and will return promises, too.*
+
 ## API and general structure
 While Xorb *does* have a few important methods, what's more important here is to understand the way a Xorb app works. The main feature is to force you to write better code by making you separate it into route related fragments. 
 
@@ -193,3 +212,30 @@ So, to give another jQuery example, the following would completely activate jQue
   });
 })(window.app, $);
 ````
+
+### HTTP 
+#### `app.http.get({string|object} url|request, {function} [callback], {object} [params], {object} [headers])`
+**url**: the URL to get. If this is an object, all request parameters will be pulled from it, instead. So it should look like `{ url: 'http://foo.bar' }`.
+**callback**: the response callback to execute once data is received. Can be omitted, which results in `app.http.get` returning the response promise itself.
+**params**: An object containing URL parameters to attach to the URL as an object. Each of its properties will be added as URL-encoded strings (`?foo=bar&baz=test`).
+**headers**: An optional object of headers to attach to the request: `{ 'Content-Type': 'text/plain' }`
+
+Equivalent methods exist for `DELETE` and `HEAD`.
+
+
+#### `app.http.getJSON({string|object} url|request, {function} [callback], {object} [params], {object} [headers])`
+**url**: the URL to get. If this is an object, all request parameters will be pulled from it, instead. So it should look like `{ url: 'http://foo.bar' }`.
+**callback**: the response callback to execute once data is received. Can be omitted, which results in `app.http.get` returning the response promise itself.
+**params**: An object containing URL parameters to attach to the URL as an object. Each of its properties will be added as URL-encoded strings (`?foo=bar&baz=test`).
+**headers**: An optional object of headers to attach to the request: `{ 'Content-Type': 'text/plain' }`
+
+Variant of the `get` function that parses the response text as JSON before it is returned.
+
+
+#### `app.http.post({string|object} url|request, {object} data, {function} [callback], {object} [headers])`
+**url**: the URL to post to. If this is an object, all request parameters will be pulled from it, instead. So it should look like `{ url: 'http://foo.bar' }`.
+**data**: POST body data to send to the server. If this is an object, it will be `JSON.stringify`-ed automatically.
+**callback**: the response callback to execute once data is received. Can be omitted, which results in `app.http.get` returning the response promise itself.
+**headers**: An optional object of headers to attach to the request: `{ 'Content-Type': 'text/plain' }`
+
+Equivalent methods exist for `PUT` and `PATCH`.
