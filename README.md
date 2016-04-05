@@ -17,10 +17,6 @@ To use Xorb, include `app.js` in your HTML file:
 ````html
 <script src="/js/app.js"></script>
 <script>
-  /**
-   * namespace and module definitions here
-   */
-
   // initialize the app and run your code
   app.init();
 </script>
@@ -36,7 +32,7 @@ Our forum app has the following namespaces defined: `/`, `/forum` and `/forum/ca
 To register a certain namespace with the app, look at the following code:
 
 ````javascript
-app.registerNamespaceAction('/', function() {
+app.namespace('/', function() {
 	document.querySelector('body').innerText = 'Hello World!';
 });
 ````
@@ -44,7 +40,7 @@ app.registerNamespaceAction('/', function() {
 The content of the callback function will now be executed on any matching page. You can also provide multiple callbacks, seperate or at once:
 
 ````javascript
-app.registerNamespaceAction('/', [
+app.namespace('/', [
 	function(app, error, next) {
 	  console.log('This is the first callback. It does not use the next()-function.');
 	},
@@ -77,7 +73,7 @@ What is more important, though: You can specify as many callbacks for a certain 
 When I say modules, I mean encapsulated objects serving some purpose. That can be jQuery, a function or a fully-fledged custom module of your choice. You don't need to make any changes to these pieces of code to make them work with Xorb. You'll need to write a quick import wrapper for them, though:
 
 ````javascript
-app.loadModule('jQuery', $, function() {
+app.registerModule('jQuery', $, function() {
   app.mountModuleEndpoint('$', 'jQuery');
 });
 ````
@@ -86,7 +82,7 @@ What does this code do? It loads an object named `$` into `app.modules.jQuery` a
 Or, to take existing events module as an example:  
 
 ````javascript
-app.loadModule('events', eventModule, function() {
+app.registerModule('events', eventModule, function() {
   
   // register event endpoints
   app.mountModuleEndpoint('on', 'events', 'on');
@@ -96,7 +92,7 @@ app.loadModule('events', eventModule, function() {
 ````
 
 This will make the three main event methods, `on`, `off` and `emit`, available as direct descendant properties of `app` so you can use `app.on('test-event', function(event) { /* ... */ })`.  
-While you *can* mount modules to specific endpoints, you don't have to. It's completely sufficient to load modules with `app.loadModule('dom', domModule);`. 
+While you *can* mount modules to specific endpoints, you don't have to. It's completely sufficient to load modules with `app.registerModule('dom', domModule);`. 
 
 
 ### HTTP requests
@@ -136,7 +132,7 @@ I plan on integrating history.js to provide support for AJAX requests and browse
 
 
 ### Namespacing
-#### `app.registerNamespaceAction({string} namespace, {Array|function} callbacks)`
+#### `app.namespace({string} namespace, {Array|function} callbacks)`
 **namespace**: The namespace (route) to register the action for  
 **callbacks**: Either an array of callbacks or a single function  
 
@@ -150,7 +146,7 @@ If callbacks are registered, they will be executed in the order they have been r
 You do not have to use any of these.  
 
 ### Modules
-#### `app.loadModule({string} name, {object} instance, {function} [init])`
+#### `app.registerModule({string} name, {object} instance, {function} [init])`
 **name**: the name the module should be available as within the app (eg. `app.modules.<module name>`).  
 **instance**: the module object to load  
 **init**: an option function to run code after the module has been loaded, the perfect place for `app.mountModuleEndpoint()`.
@@ -181,7 +177,7 @@ To create a module and make its usage easy, you should create a file named `src/
    * described in the code, or setup your basic plugin options etc.
    * The init function is optional.
    */
-  app.loadModule('mySpecialModuleName', mySpecialModule, function() {
+  app.registerModule('mySpecialModuleName', mySpecialModule, function() {
   
     /**
      * optionally expose the whole module at app.myExposedModule that points
@@ -207,7 +203,7 @@ So, to give another jQuery example, the following would completely activate jQue
     return console.error('[modules/jQuery] app.js has not been loaded yet');
   }
   
-  app.loadModule('jQuery', jQuery, function() {
+  app.registerModule('jQuery', jQuery, function() {
     app.mountModuleEndpoint('$', 'jQuery');
   });
 })(window.app, $);
