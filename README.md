@@ -1,6 +1,25 @@
 # xorb [![Build status](https://travis-ci.org/Radiergummi/xorb.svg)](https://travis-ci.org/Radiergummi/xorb)
 JS client-side framework for a clean, modern and fast app programming approach
 
+## Contents
+1. [About](#about)
+2. [Usage](#usage)
+ 1. [Namespaces](#namespaces)
+ 2. [Modules](#modules)
+ 3. [HTTP requests](#http-requests)
+3. [API and general structure](#api-and-general-structure)
+ 1. [`app` internal properties](#app-internal-properties)
+  1. [`_ns`](#-ns)
+  2. [`_modules`](#-modules)
+  3. [`_currentPath`](#-currentPath)
+  4. [`_history`](#-history)
+ 2. [Namespace API](#namespace-api)
+ 3. [Module API](#module-api)
+  1. [Creating a module](#creating-a-module)
+ 4. [HTTP API](#http-api)
+4. [Contributing](#contributing)
+
+
 ## About
 Xorb is a client-side framework which solves multiple problems:
 
@@ -10,6 +29,7 @@ Xorb is a client-side framework which solves multiple problems:
 - Completely modular: Beneath the core script `app.js`, I wrote some standard modules - an event emitter for in-app IPC, a basic DOM modification library and a socket.io wrapper. They also serve as examples for module creation.
 
 I created Xorb in an attempt to streamline client-side code. Considering my clean and concise server-side JS code on the one hand and the messy, problem-solving centered jQuery scripts on the other, I started to work on a simple, yet powerful and extensible solution to use in my NodeJS projects.  
+
 
 ## Usage
 To use Xorb, include `app.js` in your HTML file:
@@ -68,7 +88,6 @@ app.namespace('/', [
 As you can see, the chain created an error but is still executed. After the last callback has finished, though, it *will* throw an error. How you handle these is up to you - either use try-catch blocks, only logs errors, setup an error handler module (I will create one soon, I think) or just don't use errors at all.  
 What is more important, though: You can specify as many callbacks for a certain namespace as you like. The callback chain will be assembled for each one independently from the others. That means: You won't be able to pass data from '/' to '/foo'.
 
-
 ### Modules
 When I say modules, I mean encapsulated objects serving some purpose. That can be jQuery, a function or a fully-fledged custom module of your choice. You don't need to make any changes to these pieces of code to make them work with Xorb. You'll need to write a quick import wrapper for them, though:
 
@@ -94,7 +113,6 @@ app.registerModule('events', eventModule, function() {
 This will make the three main event methods, `on`, `off` and `emit`, available as direct descendant properties of `app` so you can use `app.on('test-event', function(event) { /* ... */ })`.  
 While you *can* mount modules to specific endpoints, you don't have to. It's completely sufficient to load modules with `app.registerModule('dom', domModule);`. 
 
-
 ### HTTP requests
 Xorb includes a wrapper for AJAX/Fetch calls. This serves the main purpose of unifying the access to server resources from modules or namespace actions. The HTTP API is using promises, which makes working with responses really easy:
 
@@ -114,24 +132,25 @@ app.http.get('/templates/user/edit')
 
 *Note: This shows the `app.render` method which is a part of the templates module that I'll be uploading soon - it's still being worked on and will return promises, too.*
 
+
 ## API and general structure
 While Xorb *does* have a few important methods, what's more important here is to understand the way a Xorb app works. The main feature is to force you to write better code by making you separate it into route related fragments. 
 
-### `app` properties
-#### `app.ns`
-The app namespace. Every namespace you create will be inserted here, with its name as the key. Additionally, a key named `app.ns.current` will be created that holds all namespace callbacks for the current path.
+### `app` internal properties
+#### `_ns`
+The app namespace. Every namespace you create will be inserted here, with its name as the key. Additionally, a key named `app.ns.current` will be created that holds all namespace callbacks for the current path: That is what will be run after the app is initialized. To check which namespaces are loaded, you can use `app.namespaces()` which returns a list.
 
-#### `app.modules`
-The module container. Holds all loaded modules with the specified name as the key.
+#### `_modules`
+The module container. Holds all loaded module instances with the specified name as the key. To check which modules are loaded, you can use `app.modules()` which returns a list. To get a specific module instance, you can use `app.module('mySpecialModulesName')` which returns the instance.
 
-#### `app.currentPath`
+#### `_currentPath`
 The current browser page path (equivalent to `window.location.href`). Will change soon to enable the use of regular expressions (for example `^` or `$`) and placeholders like `:variable` known from other frameworks.
 
-#### Soon to come: `app.history`
-I plan on integrating history.js to provide support for AJAX requests and browser history modification. This is delayed though because I'm trying to find a way to initialize history.js into `app.modules.history` instead of `window.History` without actually modifying its source.
+#### `_history`
+I plan on integrating history.js to provide support for AJAX requests and browser history modification. 
 
 
-### Namespacing
+### Namespace API
 #### `app.namespace({string} namespace, {Array|function} callbacks)`
 **namespace**: The namespace (route) to register the action for  
 **callbacks**: Either an array of callbacks or a single function  
@@ -145,7 +164,7 @@ If callbacks are registered, they will be executed in the order they have been r
 **data**: A possible data variable passed by the previous callback. Only present if the previous callback used `next(null, data)`.
 You do not have to use any of these.  
 
-### Modules
+### Modules API
 #### `app.registerModule({string} name, {object} instance, {function} [init])`
 **name**: the name the module should be available as within the app (eg. `app.modules.<module name>`).  
 **instance**: the module object to load  
@@ -209,7 +228,7 @@ So, to give another jQuery example, the following would completely activate jQue
 })(window.app, $);
 ````
 
-### HTTP 
+### HTTP API
 #### `app.http.get({string|object} url|request, {function} [callback], {object} [params], {object} [headers])`
 **url**: the URL to get. If this is an object, all request parameters will be pulled from it, instead. So it should look like `{ url: 'http://foo.bar' }`.
 **callback**: the response callback to execute once data is received. Can be omitted, which results in `app.http.get` returning the response promise itself.
@@ -235,3 +254,8 @@ Variant of the `get` function that parses the response text as JSON before it is
 **headers**: An optional object of headers to attach to the request: `{ 'Content-Type': 'text/plain' }`
 
 Equivalent methods exist for `PUT` and `PATCH`.
+
+
+
+## Contributing
+Xorb is still being actively worked on and has no stable releases yet. If you'd like to contribute to this project, please don't hesitate to open an issue or a pull request. I'd be glad to hear opinions on Xorb.
