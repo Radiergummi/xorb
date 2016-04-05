@@ -1,4 +1,4 @@
-# xorb
+# xorb [![Build status](https://travis-ci.org/Radiergummi/xorb.svg)](https://travis-ci.org/Radiergummi/xorb)
 JS client-side framework for a clean, modern and fast app programming approach
 
 ## About
