@@ -26,7 +26,7 @@ Xorb is a client-side framework which solves multiple problems:
 - Namespace pollution: Xorb exposes only one global variable: `app`.
 - Loading the appropriate code and dependencies for certain routes: Xorb lets you register actions for routes, which is only called when a matching route is being navigated to. 
 - Easy module/dependency integration: Xorb supports loading custom modules which are available throughout the app.
-- Completely modular: Beneath the core script `app.js`, I wrote some standard modules - an event emitter for in-app IPC, a basic DOM modification library and a socket.io wrapper. They also serve as examples for module creation.
+- Completely modular: Beneath the core script `app.js`, I wrote some standard modules - an event emitter for in-app IPC, a basic DOM modification library and a socket.io wrapper. They also serve as examples for module creation. You can find the module docs [here](src/modules).
 
 I created Xorb in an attempt to streamline client-side code. Considering my clean and concise server-side JS code on the one hand and the messy, problem-solving centered jQuery scripts on the other, I started to work on a simple, yet powerful and extensible solution to use in my NodeJS projects.  
 
