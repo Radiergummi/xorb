@@ -172,8 +172,8 @@ You do not have to use any of these.
 
 #### `app.mountModuleEndpoint({string} mountPoint, {string} module, {string} [property])`
 **mountPoint**: the exposed property below `app` the module is available on (eg. `app.mySpecialModule` or `app.mySpecialModuleMethod()`)  
-**module**: the module to mount
-**property**: the module property to mount. Optional - if omitted, the whole module will be mounted.
+**module**: the module to mount  
+**property**: the module property to mount. Optional - if omitted, the whole module will be mounted.  
 
 #### Creating a module
 To create a module and make its usage easy, you should create a file named `src/modules/<module name>.js` and include it **after** `app.js`. Within the file, create a new self-executing anonymous function so the module will integrate itself on load:  
@@ -230,28 +230,28 @@ So, to give another jQuery example, the following would completely activate jQue
 
 ### HTTP API
 #### `app.http.get({string|object} url|request, {function} [callback], {object} [params], {object} [headers])`
-**url**: the URL to get. If this is an object, all request parameters will be pulled from it, instead. So it should look like `{ url: 'http://foo.bar' }`.
-**callback**: the response callback to execute once data is received. Can be omitted, which results in `app.http.get` returning the response promise itself.
-**params**: An object containing URL parameters to attach to the URL as an object. Each of its properties will be added as URL-encoded strings (`?foo=bar&baz=test`).
-**headers**: An optional object of headers to attach to the request: `{ 'Content-Type': 'text/plain' }`
+**url**: the URL to get. If this is an object, all request parameters will be pulled from it, instead. So it should look like `{ url: 'http://foo.bar' }`.  
+**callback**: the response callback to execute once data is received. Can be omitted, which results in `app.http.get` returning the response promise itself.  
+**params**: An object containing URL parameters to attach to the URL as an object. Each of its properties will be added as URL-encoded strings (`?foo=bar&baz=test`).  
+**headers**: An optional object of headers to attach to the request: `{ 'Content-Type': 'text/plain' }`  
 
 Equivalent methods exist for `DELETE` and `HEAD`.
 
 
 #### `app.http.getJSON({string|object} url|request, {function} [callback], {object} [params], {object} [headers])`
-**url**: the URL to get. If this is an object, all request parameters will be pulled from it, instead. So it should look like `{ url: 'http://foo.bar' }`.
-**callback**: the response callback to execute once data is received. Can be omitted, which results in `app.http.get` returning the response promise itself.
-**params**: An object containing URL parameters to attach to the URL as an object. Each of its properties will be added as URL-encoded strings (`?foo=bar&baz=test`).
-**headers**: An optional object of headers to attach to the request: `{ 'Content-Type': 'text/plain' }`
+**url**: the URL to get. If this is an object, all request parameters will be pulled from it, instead. So it should look like `{ url: 'http://foo.bar' }`.  
+**callback**: the response callback to execute once data is received. Can be omitted, which results in `app.http.get` returning the response promise itself.  
+**params**: An object containing URL parameters to attach to the URL as an object. Each of its properties will be added as URL-encoded strings (`?foo=bar&baz=test`).  
+**headers**: An optional object of headers to attach to the request: `{ 'Content-Type': 'text/plain' }`  
 
 Variant of the `get` function that parses the response text as JSON before it is returned.
 
 
 #### `app.http.post({string|object} url|request, {object} data, {function} [callback], {object} [headers])`
-**url**: the URL to post to. If this is an object, all request parameters will be pulled from it, instead. So it should look like `{ url: 'http://foo.bar' }`.
-**data**: POST body data to send to the server. If this is an object, it will be `JSON.stringify`-ed automatically.
-**callback**: the response callback to execute once data is received. Can be omitted, which results in `app.http.get` returning the response promise itself.
-**headers**: An optional object of headers to attach to the request: `{ 'Content-Type': 'text/plain' }`
+**url**: the URL to post to. If this is an object, all request parameters will be pulled from it, instead. So it should look like `{ url: 'http://foo.bar' }`.  
+**data**: POST body data to send to the server. If this is an object, it will be `JSON.stringify`-ed automatically.  
+**callback**: the response callback to execute once data is received. Can be omitted, which results in `app.http.get` returning the response promise itself.  
+**headers**: An optional object of headers to attach to the request: `{ 'Content-Type': 'text/plain' }`  
 
 Equivalent methods exist for `PUT` and `PATCH`.
 
