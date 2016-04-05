@@ -143,17 +143,17 @@ var app = app || (function() {
      * @constructor
      */
     App.prototype.http = (function() {
-      var _loadedScripts = [],
+      var _loadedScripts    = [],
           _getLoadedScripts = function() {
             var scriptTags = document.querySelectorAll('script[src]');
 
             for (var i = 0; i < scriptTags.length; i++) {
-              _loadedScripts.push(scriptTags[i].src);
+              _loadedScripts.push(scriptTags[ i ].src);
             }
           },
-          HTTP     = function() {
+          HTTP              = function() {
           },
-          _adapter = {},
+          _adapter          = {},
           _buildURL;
 
 
@@ -205,7 +205,8 @@ var app = app || (function() {
         }, function(error) {
           console.error('[app/http] ' + error.message);
           console.error(error);
-        });      };
+        });
+      };
 
 
       /**
@@ -589,7 +590,8 @@ var app = app || (function() {
        * @returns {undefined}
        */
       HTTP.prototype.getScript = function(path, callback) {
-        callback = callback || function() {};
+        callback = callback || function() {
+          };
 
         // if this is not an absolute link, attach our base path
         if (path.substring(0, 7) !== 'http://' || path.substring(0, 8) !== 'https://') {
@@ -603,7 +605,7 @@ var app = app || (function() {
          * check if the script to load already has an associated script tag.
          * if so, remove it and append it again,
          */
-        if (_loadedScripts.indexOf(path.split('?')[0]) !== -1) {
+        if (_loadedScripts.indexOf(path.split('?')[ 0 ]) !== -1) {
 
           // remove the script from the DOM
           document.querySelector('script[src^="' + path + '"]').remove();
@@ -693,12 +695,37 @@ var app = app || (function() {
           }
         }
 
+        if (typeof _modules[ module ][ property ] !== 'function') {
+          return App.prototype[ mountpoint ] = _modules[ module ][ property ];
+        }
+
         return App.prototype[ mountpoint ] = function() {
           return _modules[ module ][ property ].apply(_modules[ module ], arguments);
         }
       }
 
       return console.error('[init] ' + module + ' could not be mounted at ' + mountpoint + ': A module of that name is already mounted.');
+    };
+
+
+    /**
+     * retrieves a module by name
+     *
+     * @param {string} name  the module name
+     * @returns {*}
+     */
+    App.prototype.module = function(name) {
+      return _modules[ name ];
+    };
+
+
+    /**
+     * retrieves a list of all registered modules
+     *
+     * @returns {Array}
+     */
+    App.prototype.modules = function() {
+      return Object.keys(_modules);
     };
 
 
@@ -757,6 +784,16 @@ var app = app || (function() {
 
 
     /**
+     * retrieves a list of all registered namespaces
+     *
+     * @returns {Array}
+     */
+    App.prototype.namespaces = function() {
+      return Object.keys(_ns);
+    };
+
+
+    /**
      * initializes the app
      *
      * @public
@@ -767,9 +804,9 @@ var app = app || (function() {
 
       // merge options
       for (var option in options) {
-        if (! options.hasOwnProperty(option)) continue;
+        if (!options.hasOwnProperty(option)) continue;
 
-        _options[option] = options[option];
+        _options[ option ] = options[ option ];
       }
 
       // the current application path
@@ -779,7 +816,7 @@ var app = app || (function() {
       // if we have any modules to load, do so now
       if (_options.modules.length > 0) {
         for (var i = 0; i < _options.modules.length; i++) {
-          this.http.getScript('/src/modules/' + _options.modules[i] + '.js');
+          this.http.getScript('/src/modules/' + _options.modules[ i ] + '.js');
         }
       }
 
