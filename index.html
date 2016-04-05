@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Xorb by Radiergummi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Xorb</h1>
+      <h2 class="project-tagline">JS client-side framework for a clean, modern and fast app programming approach</h2>
+      <a href="https://github.com/Radiergummi/xorb" class="btn">View on GitHub</a>
+      <a href="https://github.com/Radiergummi/xorb/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/Radiergummi/xorb/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="xorb-" class="anchor" href="#xorb-" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>xorb <a href="https://travis-ci.org/Radiergummi/xorb"><img src="https://travis-ci.org/Radiergummi/xorb.svg" alt="Build status"></a>
+</h1>
+
+<p>JS client-side framework for a clean, modern and fast app programming approach</p>
+
+<h2>
+<a id="about" class="anchor" href="#about" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>About</h2>
+
+<p>Xorb is a client-side framework which solves multiple problems:</p>
+
+<ul>
+<li>Namespace pollution: Xorb exposes only one global variable: <code>app</code>.</li>
+<li>Loading the appropriate code and dependencies for certain routes: Xorb lets you register actions for routes, which is only called when a matching route is being navigated to. </li>
+<li>Easy module/dependency integration: Xorb supports loading custom modules which are available throughout the app.</li>
+<li>Completely modular: Beneath the core script <code>app.js</code>, I wrote some standard modules - an event emitter for in-app IPC, a basic DOM modification library and a socket.io wrapper. They also serve as examples for module creation.</li>
+</ul>
+
+<p>I created Xorb in an attempt to streamline client-side code. Considering my clean and concise server-side JS code on the one hand and the messy, problem-solving centered jQuery scripts on the other, I started to work on a simple, yet powerful and extensible solution to use in my NodeJS projects.  </p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>To use Xorb, include <code>app.js</code> in your HTML file:</p>
+
+<div class="highlight highlight-text-html-basic"><pre>&lt;<span class="pl-ent">script</span> <span class="pl-e">src</span>=<span class="pl-s"><span class="pl-pds">"</span>/js/app.js<span class="pl-pds">"</span></span>&gt;&lt;/<span class="pl-ent">script</span>&gt;
+<span class="pl-s1">&lt;<span class="pl-ent">script</span>&gt;</span>
+<span class="pl-s1">  <span class="pl-c">/**</span></span>
+<span class="pl-s1"><span class="pl-c">   * namespace and module definitions here</span></span>
+<span class="pl-s1"><span class="pl-c">   */</span></span>
+<span class="pl-s1"></span>
+<span class="pl-s1">  <span class="pl-c">// initialize the app and run your code</span></span>
+<span class="pl-s1">  <span class="pl-smi">app</span>.<span class="pl-en">init</span>();</span>
+<span class="pl-s1">&lt;/<span class="pl-ent">script</span>&gt;</span></pre></div>
+
+<h3>
+<a id="namespaces" class="anchor" href="#namespaces" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Namespaces</h3>
+
+<p>This will prepare the Xorb API so you can start defining your app namespaces. A namespace is a URI fragment, many popular serverside frameworks refer to it as <em>routes</em>. The main namespace every page shares is <code>/</code>: Every URI starts with a slash.<br>
+An important thing to note here is that namespace actions will be applied to <strong>every</strong> matching URI. Consider the following page:</p>
+
+<pre><code>/forum/category/23/foo+bar
+</code></pre>
+
+<p>Our forum app has the following namespaces defined: <code>/</code>, <code>/forum</code> and <code>/forum/category</code>. For our page, Xorb will determine every of said namespaces as matching. That means, as long as you use a clear URI scheme for your app, Xorb allows you to write specific code for certain pages as well as shared code for different areas of your app.<br>
+To register a certain namespace with the app, look at the following code:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">app</span>.<span class="pl-en">registerNamespaceAction</span>(<span class="pl-s"><span class="pl-pds">'</span>/<span class="pl-pds">'</span></span>, <span class="pl-k">function</span>() {
+    <span class="pl-c1">document</span>.<span class="pl-en">querySelector</span>(<span class="pl-s"><span class="pl-pds">'</span>body<span class="pl-pds">'</span></span>).<span class="pl-smi">innerText</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">'</span>Hello World!<span class="pl-pds">'</span></span>;
+});</pre></div>
+
+<p>The content of the callback function will now be executed on any matching page. You can also provide multiple callbacks, seperate or at once:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">app</span>.<span class="pl-en">registerNamespaceAction</span>(<span class="pl-s"><span class="pl-pds">'</span>/<span class="pl-pds">'</span></span>, [
+    <span class="pl-k">function</span>(<span class="pl-smi">app</span>, <span class="pl-smi">error</span>, <span class="pl-smi">next</span>) {
+      <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>This is the first callback. It does not use the next()-function.<span class="pl-pds">'</span></span>);
+    },
+    <span class="pl-k">function</span>(<span class="pl-smi">app</span>, <span class="pl-smi">error</span>, <span class="pl-smi">next</span>) {
+      <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>This is the second callback. It sends data to the next one.<span class="pl-pds">'</span></span>);
+      <span class="pl-en">next</span>(<span class="pl-c1">null</span>, <span class="pl-s"><span class="pl-pds">'</span>foobar<span class="pl-pds">'</span></span>);
+    },
+    <span class="pl-k">function</span>(<span class="pl-smi">app</span>, <span class="pl-smi">error</span>, <span class="pl-smi">next</span>, <span class="pl-smi">data</span>) {
+      <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>This is the third callback. It received data from the previous one: <span class="pl-pds">'</span></span> <span class="pl-k">+</span> data);
+      <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>It will not send anything to the next one, though...<span class="pl-pds">'</span></span>);
+    },
+    <span class="pl-k">function</span>(<span class="pl-smi">app</span>, <span class="pl-smi">error</span>, <span class="pl-smi">next</span>, <span class="pl-smi">data</span>) {
+      <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>This is the fourth callback. It expects to receive data from the previous one.<span class="pl-pds">'</span></span>);
+
+      <span class="pl-k">if</span> (<span class="pl-k">!</span> data) {
+        <span class="pl-k">return</span> <span class="pl-en">next</span>(<span class="pl-k">new</span> <span class="pl-en">Error</span>(<span class="pl-s"><span class="pl-pds">'</span>No data received from callback three<span class="pl-pds">'</span></span>));
+      }
+    },
+    <span class="pl-k">function</span>(<span class="pl-smi">app</span>, <span class="pl-smi">error</span>, <span class="pl-smi">next</span>) {
+      <span class="pl-en">console</span>.<span class="pl-c1">log</span>(<span class="pl-s"><span class="pl-pds">'</span>This is the fifth and last callback. The previous one threw an error, it is still being executed.<span class="pl-pds">'</span></span>);
+    }
+]);</pre></div>
+
+<p>As you can see, the chain created an error but is still executed. After the last callback has finished, though, it <em>will</em> throw an error. How you handle these is up to you - either use try-catch blocks, only logs errors, setup an error handler module (I will create one soon, I think) or just don't use errors at all.<br>
+What is more important, though: You can specify as many callbacks for a certain namespace as you like. The callback chain will be assembled for each one independently from the others. That means: You won't be able to pass data from '/' to '/foo'.</p>
+
+<h3>
+<a id="modules" class="anchor" href="#modules" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Modules</h3>
+
+<p>When I say modules, I mean encapsulated objects serving some purpose. That can be jQuery, a function or a fully-fledged custom module of your choice. You don't need to make any changes to these pieces of code to make them work with Xorb. You'll need to write a quick import wrapper for them, though:</p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">app</span>.<span class="pl-en">loadModule</span>(<span class="pl-s"><span class="pl-pds">'</span>jQuery<span class="pl-pds">'</span></span>, $, <span class="pl-k">function</span>() {
+  <span class="pl-smi">app</span>.<span class="pl-en">mountModuleEndpoint</span>(<span class="pl-s"><span class="pl-pds">'</span>$<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>jQuery<span class="pl-pds">'</span></span>);
+});</pre></div>
+
+<p>What does this code do? It loads an object named <code>$</code> into <code>app.modules.jQuery</code> and executes a callback function once that is done. The callback makes the <code>$</code> object available as <code>app.$</code>. So to call a jQuery method later on, just use <code>app.$('selector').addClass('test')</code>.<br>
+Or, to take existing events module as an example:  </p>
+
+<div class="highlight highlight-source-js"><pre><span class="pl-smi">app</span>.<span class="pl-en">loadModule</span>(<span class="pl-s"><span class="pl-pds">'</span>events<span class="pl-pds">'</span></span>, eventModule, <span class="pl-k">function</span>() {
+
+  <span class="pl-c">// register event endpoints</span>
+  <span class="pl-smi">app</span>.<span class="pl-en">mountModuleEndpoint</span>(<span class="pl-s"><span class="pl-pds">'</span>on<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>events<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>on<span class="pl-pds">'</span></span>);
+  <span class="pl-smi">app</span>.<span class="pl-en">mountModuleEndpoint</span>(<span class="pl-s"><span class="pl-pds">'</span>off<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>events<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>off<span class="pl-pds">'</span></span>);
+  <span class="pl-smi">app</span>.<span class="pl-en">mountModuleEndpoint</span>(<span class="pl-s"><span class="pl-pds">'</span>emit<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>events<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>emit<span class="pl-pds">'</span></span>);
+});</pre></div>
+
+<p>This will make the three main event methods, <code>on</code>, <code>off</code> and <code>emit</code>, available as direct descendant properties of <code>app</code> so you can use <code>app.on('test-event', function(event) { /* ... */ })</code>.<br>
+While you <em>can</em> mount modules to specific endpoints, you don't have to. It's completely sufficient to load modules with <code>app.loadModule('dom', domModule);</code>. </p>
+
+<h3>
+<a id="http-requests" class="anchor" href="#http-requests" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>HTTP requests</h3>
+
+<p>Xorb includes a wrapper for AJAX/Fetch calls. This serves the main purpose of unifying the access to server resources from modules or namespace actions. The HTTP API is using promises, which makes working with responses really easy:</p>
+
+<div class="highlight highlight-source-js"><pre>
+<span class="pl-c">// perform a GET request</span>
+<span class="pl-smi">app</span>.<span class="pl-smi">http</span>.<span class="pl-en">get</span>(<span class="pl-s"><span class="pl-pds">'</span>/templates/user/edit<span class="pl-pds">'</span></span>)
+
+  <span class="pl-c">// render the downloaded template</span>
+  .<span class="pl-en">then</span>(<span class="pl-smi">app</span>.<span class="pl-smi">render</span>)
+
+  <span class="pl-c">// insert the rendered template into the DOM</span>
+  .<span class="pl-en">then</span>(<span class="pl-k">function</span>(<span class="pl-smi">renderedTemplate</span>) {
+    <span class="pl-smi">app</span>.<span class="pl-smi">dom</span>.<span class="pl-en">el</span>(<span class="pl-s"><span class="pl-pds">'</span>.edit-user<span class="pl-pds">'</span></span>).<span class="pl-smi">innerHTML</span> <span class="pl-k">=</span> renderedTemplate;
+  });</pre></div>
+
+<p><em>Note: This shows the <code>app.render</code> method which is a part of the templates module that I'll be uploading soon - it's still being worked on and will return promises, too.</em></p>
+
+<h2>
+<a id="api-and-general-structure" class="anchor" href="#api-and-general-structure" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>API and general structure</h2>
+
+<p>While Xorb <em>does</em> have a few important methods, what's more important here is to understand the way a Xorb app works. The main feature is to force you to write better code by making you separate it into route related fragments. </p>
+
+<h3>
+<a id="app-properties" class="anchor" href="#app-properties" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>app</code> properties</h3>
+
+<h4>
+<a id="appns" class="anchor" href="#appns" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>app.ns</code>
+</h4>
+
+<p>The app namespace. Every namespace you create will be inserted here, with its name as the key. Additionally, a key named <code>app.ns.current</code> will be created that holds all namespace callbacks for the current path.</p>
+
+<h4>
+<a id="appmodules" class="anchor" href="#appmodules" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>app.modules</code>
+</h4>
+
+<p>The module container. Holds all loaded modules with the specified name as the key.</p>
+
+<h4>
+<a id="appcurrentpath" class="anchor" href="#appcurrentpath" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>app.currentPath</code>
+</h4>
+
+<p>The current browser page path (equivalent to <code>window.location.href</code>). Will change soon to enable the use of regular expressions (for example <code>^</code> or <code>$</code>) and placeholders like <code>:variable</code> known from other frameworks.</p>
+
+<h4>
+<a id="soon-to-come-apphistory" class="anchor" href="#soon-to-come-apphistory" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Soon to come: <code>app.history</code>
+</h4>
+
+<p>I plan on integrating history.js to provide support for AJAX requests and browser history modification. This is delayed though because I'm trying to find a way to initialize history.js into <code>app.modules.history</code> instead of <code>window.History</code> without actually modifying its source.</p>
+
+<h3>
+<a id="namespacing" class="anchor" href="#namespacing" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Namespacing</h3>
+
+<h4>
+<a id="appregisternamespaceactionstring-namespace-arrayfunction-callbacks" class="anchor" href="#appregisternamespaceactionstring-namespace-arrayfunction-callbacks" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>app.registerNamespaceAction({string} namespace, {Array|function} callbacks)</code>
+</h4>
+
+<p><strong>namespace</strong>: The namespace (route) to register the action for<br>
+<strong>callbacks</strong>: Either an array of callbacks or a single function  </p>
+
+<p>If callbacks are registered, they will be executed in the order they have been registered when the namespace execution starts later on. Callbacks have to be structured like so:  </p>
+
+<h5>
+<a id="functionobject-app-object-error-function-next--data" class="anchor" href="#functionobject-app-object-error-function-next--data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>function({object} app, {object} error, {function} next, {*} data)</code>
+</h5>
+
+<p><strong>app</strong>: The <code>app</code> itself. Currently useless as the app is visible in the global namespace, this may change to better encapsulation soon.<br>
+<strong>error</strong>: A possible previous error object. This will throw an exception once the namespace callbacks have finished.<br>
+<strong>next</strong>: The next callback. Allows to return prematurely and pass data to the next callback.<br>
+<strong>data</strong>: A possible data variable passed by the previous callback. Only present if the previous callback used <code>next(null, data)</code>.
+You do not have to use any of these.  </p>
+
+<h3>
+<a id="modules-1" class="anchor" href="#modules-1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Modules</h3>
+
+<h4>
+<a id="apploadmodulestring-name-object-instance-function-init" class="anchor" href="#apploadmodulestring-name-object-instance-function-init" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>app.loadModule({string} name, {object} instance, {function} [init])</code>
+</h4>
+
+<p><strong>name</strong>: the name the module should be available as within the app (eg. <code>app.modules.&lt;module name&gt;</code>).<br>
+<strong>instance</strong>: the module object to load<br>
+<strong>init</strong>: an option function to run code after the module has been loaded, the perfect place for <code>app.mountModuleEndpoint()</code>.</p>
+
+<h4>
+<a id="appmountmoduleendpointstring-mountpoint-string-module-string-property" class="anchor" href="#appmountmoduleendpointstring-mountpoint-string-module-string-property" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>app.mountModuleEndpoint({string} mountPoint, {string} module, {string} [property])</code>
+</h4>
+
+<p><strong>mountPoint</strong>: the exposed property below <code>app</code> the module is available on (eg. <code>app.mySpecialModule</code> or <code>app.mySpecialModuleMethod()</code>)<br>
+<strong>module</strong>: the module to mount
+<strong>property</strong>: the module property to mount. Optional - if omitted, the whole module will be mounted.</p>
+
+<h4>
+<a id="creating-a-module" class="anchor" href="#creating-a-module" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Creating a module</h4>
+
+<p>To create a module and make its usage easy, you should create a file named <code>src/modules/&lt;module name&gt;.js</code> and include it <strong>after</strong> <code>app.js</code>. Within the file, create a new self-executing anonymous function so the module will integrate itself on load:  </p>
+
+<div class="highlight highlight-source-js"><pre>(<span class="pl-k">function</span>(<span class="pl-smi">app</span>) {
+  <span class="pl-k">if</span> (<span class="pl-k">!</span> app) {
+    <span class="pl-k">return</span> <span class="pl-en">console</span>.<span class="pl-c1">error</span>(<span class="pl-s"><span class="pl-pds">'</span>[modules/mySpecialModule] app.js has not been loaded yet<span class="pl-pds">'</span></span>);
+  }
+
+  <span class="pl-c">// create your module object or hand over your module object</span>
+  <span class="pl-k">var</span> mySpecialModule <span class="pl-k">=</span> {};
+
+  <span class="pl-c">// ... your module code</span>
+
+  <span class="pl-c">/**</span>
+<span class="pl-c">   * the important part: writing your loadModule statement. the third </span>
+<span class="pl-c">   * parameter, the init function, enables you to execute code once your</span>
+<span class="pl-c">   * module has been loaded. Here, you could mount module endpoints as </span>
+<span class="pl-c">   * described in the code, or setup your basic plugin options etc.</span>
+<span class="pl-c">   * The init function is optional.</span>
+<span class="pl-c">   */</span>
+  <span class="pl-smi">app</span>.<span class="pl-en">loadModule</span>(<span class="pl-s"><span class="pl-pds">'</span>mySpecialModuleName<span class="pl-pds">'</span></span>, mySpecialModule, <span class="pl-k">function</span>() {
+
+    <span class="pl-c">/**</span>
+<span class="pl-c">     * optionally expose the whole module at app.myExposedModule that points</span>
+<span class="pl-c">     * to app.modules.mySpecialModule</span>
+<span class="pl-c">     */</span>
+    <span class="pl-smi">app</span>.<span class="pl-en">mountModuleEndpoint</span>(<span class="pl-s"><span class="pl-pds">'</span>myExposedModule<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>mySpecialModule<span class="pl-pds">'</span></span>);
+
+    <span class="pl-c">/**</span>
+<span class="pl-c">     * optionally expose a single method or property at app.myExposedMethod</span>
+<span class="pl-c">     * that points to app.modules.mySpecialModule.myInternalMethodName</span>
+<span class="pl-c">     */</span>
+    <span class="pl-smi">app</span>.<span class="pl-en">mountModuleEndpoint</span>(<span class="pl-s"><span class="pl-pds">'</span>myExposedMethod<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>mySpecialModule<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>myInternalMethodName<span class="pl-pds">'</span></span>);
+  });
+})(<span class="pl-c1">window</span>.<span class="pl-smi">app</span>);</pre></div>
+
+<p>So, to give another jQuery example, the following would completely activate jQuery in Xorb:</p>
+
+<div class="highlight highlight-source-js"><pre>(<span class="pl-k">function</span>(<span class="pl-smi">app</span>, <span class="pl-smi">jQuery</span>) {
+  <span class="pl-k">if</span> (<span class="pl-k">!</span> app) {
+    <span class="pl-k">return</span> <span class="pl-en">console</span>.<span class="pl-c1">error</span>(<span class="pl-s"><span class="pl-pds">'</span>[modules/jQuery] app.js has not been loaded yet<span class="pl-pds">'</span></span>);
+  }
+
+  <span class="pl-smi">app</span>.<span class="pl-en">loadModule</span>(<span class="pl-s"><span class="pl-pds">'</span>jQuery<span class="pl-pds">'</span></span>, jQuery, <span class="pl-k">function</span>() {
+    <span class="pl-smi">app</span>.<span class="pl-en">mountModuleEndpoint</span>(<span class="pl-s"><span class="pl-pds">'</span>$<span class="pl-pds">'</span></span>, <span class="pl-s"><span class="pl-pds">'</span>jQuery<span class="pl-pds">'</span></span>);
+  });
+})(<span class="pl-c1">window</span>.<span class="pl-smi">app</span>, $);</pre></div>
+
+<h3>
+<a id="http" class="anchor" href="#http" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>HTTP</h3>
+
+<h4>
+<a id="apphttpgetstringobject-urlrequest-function-callback-object-params-object-headers" class="anchor" href="#apphttpgetstringobject-urlrequest-function-callback-object-params-object-headers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>app.http.get({string|object} url|request, {function} [callback], {object} [params], {object} [headers])</code>
+</h4>
+
+<p><strong>url</strong>: the URL to get. If this is an object, all request parameters will be pulled from it, instead. So it should look like <code>{ url: 'http://foo.bar' }</code>.
+<strong>callback</strong>: the response callback to execute once data is received. Can be omitted, which results in <code>app.http.get</code> returning the response promise itself.
+<strong>params</strong>: An object containing URL parameters to attach to the URL as an object. Each of its properties will be added as URL-encoded strings (<code>?foo=bar&amp;baz=test</code>).
+<strong>headers</strong>: An optional object of headers to attach to the request: <code>{ 'Content-Type': 'text/plain' }</code></p>
+
+<p>Equivalent methods exist for <code>DELETE</code> and <code>HEAD</code>.</p>
+
+<h4>
+<a id="apphttpgetjsonstringobject-urlrequest-function-callback-object-params-object-headers" class="anchor" href="#apphttpgetjsonstringobject-urlrequest-function-callback-object-params-object-headers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>app.http.getJSON({string|object} url|request, {function} [callback], {object} [params], {object} [headers])</code>
+</h4>
+
+<p><strong>url</strong>: the URL to get. If this is an object, all request parameters will be pulled from it, instead. So it should look like <code>{ url: 'http://foo.bar' }</code>.
+<strong>callback</strong>: the response callback to execute once data is received. Can be omitted, which results in <code>app.http.get</code> returning the response promise itself.
+<strong>params</strong>: An object containing URL parameters to attach to the URL as an object. Each of its properties will be added as URL-encoded strings (<code>?foo=bar&amp;baz=test</code>).
+<strong>headers</strong>: An optional object of headers to attach to the request: <code>{ 'Content-Type': 'text/plain' }</code></p>
+
+<p>Variant of the <code>get</code> function that parses the response text as JSON before it is returned.</p>
+
+<h4>
+<a id="apphttppoststringobject-urlrequest-object-data-function-callback-object-headers" class="anchor" href="#apphttppoststringobject-urlrequest-object-data-function-callback-object-headers" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><code>app.http.post({string|object} url|request, {object} data, {function} [callback], {object} [headers])</code>
+</h4>
+
+<p><strong>url</strong>: the URL to post to. If this is an object, all request parameters will be pulled from it, instead. So it should look like <code>{ url: 'http://foo.bar' }</code>.
+<strong>data</strong>: POST body data to send to the server. If this is an object, it will be <code>JSON.stringify</code>-ed automatically.
+<strong>callback</strong>: the response callback to execute once data is received. Can be omitted, which results in <code>app.http.get</code> returning the response promise itself.
+<strong>headers</strong>: An optional object of headers to attach to the request: <code>{ 'Content-Type': 'text/plain' }</code></p>
+
+<p>Equivalent methods exist for <code>PUT</code> and <code>PATCH</code>.</p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/Radiergummi/xorb">Xorb</a> is maintained by <a href="https://github.com/Radiergummi">Radiergummi</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
