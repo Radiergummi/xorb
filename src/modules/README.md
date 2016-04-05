@@ -66,7 +66,7 @@ switch (templatesModule.options.templateEngine) {
       templatesModule.templateEngine = window.yourOwnTemplateEnginesObjectName;
       
       // the method to render templates. You can do whatever you want, just make 
-      // sure this returns a string.
+      // sure this returns a string or a Promise.
       templatesModule.renderMethod = function(engine, template, variables) {
       
         // engine is your template engines instance, template is the string 
