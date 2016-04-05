@@ -17,4 +17,3 @@ before_script:
   - mocha-phantomjs --version
 script:
   - mocha-phantomjs test/testRunner.html
-  - make test
