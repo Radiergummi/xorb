@@ -10,7 +10,8 @@ node_js:
 install:
   - npm install phantomjs-prebuilt -g
   - npm install -g mocha-phantomjs
-  - npm install
+  - npm install mocha
+  - npm install chai
 before_script:
   - phantomjs --version
   - mocha-phantomjs --version
