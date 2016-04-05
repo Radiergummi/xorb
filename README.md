@@ -14,7 +14,7 @@ JS client-side framework for a clean, modern and fast app programming approach
   3. [`_currentPath`](#-currentPath)
   4. [`_history`](#-history)
  2. [Namespace API](#namespace-api)
- 3. [Module API](#module-api)
+ 3. [Module API](#modules-api)
   1. [Creating a module](#creating-a-module)
  4. [HTTP API](#http-api)
 4. [Contributing](#contributing)
