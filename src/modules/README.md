@@ -32,11 +32,13 @@ To retrieve your stored template files, you could use the HTTP API (which would 
 method provided by the module. It will be added to the `app.http` object for your convenience. Using it is simple:  
 
 ````javascript
+var templateVariables = {
+      status: 'working'
+    };
+
 app.http.getTemplate('exampleTemplate.hbs', function(content) {
     document.querySelector('.target-container').innerText = content;
-  }, {
-    status: 'working'
-  });
+  }, templateVariables);
   
   /* results in:
     <div class="target-container">template rendering is working.</div>
