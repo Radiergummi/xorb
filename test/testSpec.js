@@ -71,7 +71,7 @@ describe('Testing the Xorb HTTP API', function() {
 describe('Testing the templates module', function() {
   it('Should initialize', function() {
     app.getScript('../src/modules/templates.js', function() {
-      return expect(app).to.have.property('templates');
+      return expect(app.templates).to.exist;
     });
   });
 });
