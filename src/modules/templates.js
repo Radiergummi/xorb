@@ -75,7 +75,14 @@
   templatesModule.configure = function(options) {
   };
 
-
+  
+  /**
+   * renders a template string and returns a promise
+   * 
+   * @param {string} template   the template string to render
+   * @param {object} variables  the template variables to use
+   * @returns {Promise} 
+   */
   templatesModule.render = function(template, variables) {
     return new Promise(function(resolve, reject) {
       try {
