@@ -298,6 +298,13 @@ var app = app || (function() {
        * @returns {*}
        */
       _buildURL = function(url, params) {
+        
+        // check for relative links
+        if (! /^https?:\/\//i.test(url)) {
+          
+          // if we have a relative link, append the basepath to it and insert a slash if necessary
+          url = _options.basePath + ((_options.basePath.charAt(_options.basePath.length - 1) !== '/' && url.charAt(0) !== '/') ? '/' : '') + url;
+        }
 
         // if we have query parameters, append them to the URL string
         if (params) {
@@ -615,50 +622,53 @@ var app = app || (function() {
        * @returns {undefined}
        */
       HTTP.prototype.getScript = function(path, callback) {
-        callback = callback || function() {
+        return new Promise(function(resolve, reject) {
+          callback = callback || function() {};
+  
+          // if this is not an absolute link, attach our base path
+          if (! /^https?:\/\//i.test(path)) {
+            path = _options.basePath + ((path.charAt(0) !== '/' && _options.basePath.charAt(_options.basePath.length - 1) !== '/') ? '/' : '') + path;
+          }  
+          // update the loaded scripts index
+          _getLoadedScripts();
+
+          /**
+           * check if the script to load already has an associated script tag.
+           * if so, remove it and append it again,
+           */
+          if (_loadedScripts.indexOf(path.split('?')[ 0 ]) !== -1) {
+  
+            // remove the script from the DOM
+            document.querySelector('script[src^="' + path + '"]').remove();
+  
+            // update the script path with the current timestamp to circumvent caching
+            path = path + '?d=' + Date.now();
+          }
+
+          var scriptTag = document.createElement('script');
+          scriptTag.src = path;
+
+          // run the callback if there was an error loading the script, supplement a new Error
+          scriptTag.onerror = function() {
+            var loadError = new Error('Script could not be fetched: ' + path);
+            console.error('[app/http] ' + loadError.message);
+  
+            return reject(loadError);
           };
 
-        // if this is not an absolute link, attach our base path
-        if (path.substring(0, 7) !== 'http://' || path.substring(0, 8) !== 'https://') {
-          path = _options.basePath + path;
-        }
+          // run the callback once the script has been loaded
+          scriptTag.onload = scriptTag.onreadystatechange = function() {
+            if (!this.readyState || this.readyState === 'loaded' || this.readyState === 'complete') {
+              return resolve(scriptTag);
+            }
+          };
 
-        // update the loaded scripts index
-        _getLoadedScripts();
+          // append the script the the document
+          document.getElementsByTagName('head')[ 0 ].appendChild(scriptTag);
 
-        /**
-         * check if the script to load already has an associated script tag.
-         * if so, remove it and append it again,
-         */
-        if (_loadedScripts.indexOf(path.split('?')[ 0 ]) !== -1) {
-
-          // remove the script from the DOM
-          document.querySelector('script[src^="' + path + '"]').remove();
-
-          // update the script path with the current timestamp to circumvent caching
-          path = path + '?d=' + Date.now();
-        }
-
-        var scriptTag = document.createElement('script');
-        scriptTag.src = path;
-
-        document.querySelector('head').appendChild(scriptTag);
-
-        // run the callback if there was an error loading the script, supplement a new Error
-        scriptTag.onerror = function() {
-          var loadError = new Error('Script could not be fetched: ' + path);
-          console.error('[app/http] ' + loadError.message);
-
-          return callback(loadError);
-        };
-
-        // run the callback once the script has been loaded
-        scriptTag.onload = function() {
-          return callback(null);
-        };
-
-        // update the loaded scripts index again (we made changes)
-        _getLoadedScripts();
+          // update the loaded scripts index again (we made changes)
+          _getLoadedScripts();
+        });
       };
 
       // return an instance of the HTTP class
@@ -841,14 +851,28 @@ var app = app || (function() {
       _buildNamespace();
 
       // if we have any modules to load, do so now
-      if (_options.modules.length > 0) {
-        for (var i = 0; i < _options.modules.length; i++) {
-          this.http.getScript('/src/modules/' + _options.modules[ i ] + '.js');
-        }
-      }
+      var moduleLoaders = _options.modules.map(function(moduleName) {
+        return app.http.getScript('/src/modules/' + moduleName + '.js');
+      });
 
-      // run the app once the DOM has finished loading
-      document.addEventListener('DOMContentLoaded', _run, false);
+      // once all modules have loaded, attach the ready listener
+      Promise.all(moduleLoaders).then(function(scripts) {
+        if (document.readyState !== 'complete') {
+
+          // run the app once the DOM has finished loading
+          document.onreadystatechange = function() {
+            _run();
+            app.ready = true;
+            callback.call(window);
+          };
+        } else {
+          _run();
+          app.ready = true;
+          callback.call(window);
+        }
+      }, function(error) {
+        console.error('[app/init] ' + error.message);
+      });
     };
 
     // return the core app object
