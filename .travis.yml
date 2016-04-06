@@ -1,4 +1,5 @@
 language: node_js
+
 node_js:
   - "5"
   - "5.1"
@@ -7,14 +8,27 @@ node_js:
   - "4.1"
   - "4.0"
   - "0.12"
+
+cache:
+  directories:
+    - node_modules
+
 install:
 #  - npm install phantomjs-prebuilt -g
   - npm install -g mocha-phantomjs
   - npm install mocha
   - npm install chai
   - npm install chai-as-promised
+  
 before_script:
   - phantomjs --webdriver=4444 &
   - mocha-phantomjs --version
+
 script:
   - mocha-phantomjs test/testRunner.html
+
+addons:
+  sauce_connect:
+    username: "Radiergummi"
+    access_key:
+      secure: "WXrrkMARvVGfPPPOGu4QGjG5UTkiERjnb4lKUBYdCiB3LupFqLj+YuiGxI2w59IbH8xSsUjmwp2dHhlvo2MWE2tlTF6p1S6t40rGMYjZfgYp7DdLMqM3ELqghUyez4WSabmLkwb91WtFjrpIIySbwvB+AZA3HiPlDwI/3ZmgxrfOEDio12Fgj/dfEJ2F7Uyc3q9Sb5x5luyRxTCm+ebd76m8P3+1WY+8j9Y4VVkRZWJJFbU9IV/WA7TIUXuzXFp9Z3BRLmgRRTHpY3dVFZE/fFY2KvMW8L1qx5HhZ3at5Vf2YgmxNnZ3eTDfrmPxHDG8lqVCkkjQLceVW5Zgf8A077VZuu2lZ6BmIL45jCm3EeDLLX0gug+rih136kMTaLpTYPTpYCzhpvVr9LvyUUsDCsEmCRBME9PGDMhepQwtRUdwBCWJ51aPUtsmGAw+iY/Ea2tOBFzHEce9qKLOyKrykyJsAzTtv0BKNR9w9Sc3L8HhpPehFz0Pqo/LrcqLRvBc6AqYAaczETgjUjy9X0JiggGCA5E3Ff2PA2lQq4/jMq7fX5J9sVFV/TED3qWdtfYxPzxmm5SsZGyxlc+nTkLnRy+K418ycPFLV3gLHIBuRg6kHGa/tLh9RdNqJsVszbsrGHL4kbGnY13J8imVh+C1bMpcRt7wuc7J/r2Zwlr3S+I="
