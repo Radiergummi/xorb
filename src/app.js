@@ -834,10 +834,13 @@ var app = app || (function() {
      * initializes the app
      *
      * @public
-     * @param {object} [options]  configuration options to start the app with
+     * @param {object}   [options]   configuration options to start the app with
+     * @param {function} [callback]  an optional callback to execute once everything is ready
      * @returns {App}
      */
-    App.prototype.init = function(options) {
+    App.prototype.init = function(options, callback) {
+      options = options || {};
+      callback = callback || function() {};
 
       // merge options
       for (var option in options) {
