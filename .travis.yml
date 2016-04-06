@@ -14,7 +14,7 @@ install:
   - npm install chai
   - npm install chai-as-promised
 before_script:
-  - phantomjs --webdriver=4444
+  - phantomjs --webdriver=4444 &
   - mocha-phantomjs --version
 script:
   - mocha-phantomjs test/testRunner.html
