@@ -17,6 +17,23 @@ var app = app || (function() {
     // constructor
     function App () {
     }
+    
+    
+    // pseudo "destructor"
+    App.prototype.destroy = function() {
+      _ns = {
+        current: []
+      };
+
+      _modules = {};
+
+      _mountPoints.map(function(mountpoint) {
+        delete app.__proto__[mountpoint];
+      });
+
+      _mountPoints = [];
+    }
+
 
     /**
      * the configuration store
@@ -26,7 +43,6 @@ var app = app || (function() {
      */
     var _options = {
       basePath: window.location.origin
-
     };
 
     /**
@@ -54,6 +70,15 @@ var app = app || (function() {
      * @var {string}
      */
     var _currentPath = null;
+
+
+    /**
+     * all mountpoints currently used by modules
+     *
+     * @private
+     * @var {Array}
+     */
+    var _mountPoints = [];
 
 
     /**
@@ -689,6 +714,8 @@ var app = app || (function() {
       }
 
       if (!App.prototype.hasOwnProperty(mountpoint)) {
+        _mountPoints.push(mountpoint);
+
         if (!property) {
           return App.prototype[ mountpoint ] = function() {
             return _modules[ module ].apply(_modules[ module ], arguments);
@@ -704,7 +731,7 @@ var app = app || (function() {
         }
       }
 
-      return console.error('[init] ' + module + ' could not be mounted at ' + mountpoint + ': A module of that name is already mounted.');
+      return console.error('[init] ' + module + ' could not be mounted at ' + (property ? 'app.' : '') + mountpoint + ': The mount point is already in use.');
     };
 
 
