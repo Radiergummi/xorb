@@ -23,7 +23,17 @@
   </script>
     <script src="./testSpec.js"></script>
     <script>
-      mocha.run();
+      console.log(window.location.origin);
+      app.init({
+        basePath: window.location.origin + '',
+        modules: [
+          'events',
+          'templates',
+          'dom'
+        ]
+      }, function() {
+        mocha.run();
+      });
     </script>
   </body>
 </html>
