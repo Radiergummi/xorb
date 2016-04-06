@@ -14,11 +14,13 @@
     <div id="mocha"></div>
     <script src="../node_modules/mocha/mocha.js"></script>
     <script src="../node_modules/chai/chai.js"></script>
+    <script src="../node_modules/chai-as-promised/lib/chai-as-promised.js"></script>
     <script>
       mocha.ui('bdd');
       mocha.reporter('html');
       var expect = chai.expect;
-    </script>
+      chai.use(chaiAsPromised);
+  </script>
     <script src="./testSpec.js"></script>
     <script>
       mocha.run();
