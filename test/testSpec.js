@@ -1,3 +1,4 @@
+
 'use strict';
 
 /*
@@ -6,18 +7,8 @@
  expect
  */
 
-describe('Testing Xorb', function() {
-  it('Should initialize', function() {
-
-    app.init({
-      basePath: window.location.origin + '/xorb',
-      modules: [
-        'events',
-        'dom',
-        'templates'
-      ]
-    });
-
+describe('Testing Xorb core', function() {
+  it('Should be initialized', function() {
     expect(typeof app).to.not.be.an('undefined');
   });
 
@@ -52,17 +43,27 @@ describe('Testing Xorb', function() {
 
     expect(app.exposedMethod(5)).to.equal(6);
   });
+
+  it('Should delay for 3 seconds', function() {
+    setTimeout(function() {
+      resume();
+    }, 3000);
+
+    function resume() {
+      expect(app).to.not.be.an('undefined');
+    }
+  });
 });
 
 describe('Testing the Xorb HTTP API', function() {
   it('Should GET resources', function() {
-    app.http.get('fixtures/testfile.json').then(function(response) {
+    app.http.get('test/fixtures/testfile.json').then(function(response) {
       return expect(response.ok).to.be.true;
     });
   });
 
   it('Should GET JSON files', function() {
-    app.http.getJSON('fixtures/testfile.json').then(function(response) {
+    app.http.getJSON('test/fixtures/testfile.json').then(function(response) {
       return expect(response.string).to.equal('foo bar, baz!');
     });
   });
@@ -70,8 +71,24 @@ describe('Testing the Xorb HTTP API', function() {
 
 describe('Testing the templates module', function() {
   it('Should initialize', function() {
-    app.getScript('../src/modules/templates.js', function() {
-      return expect(app.templates).to.exist;
-    });
+    expect(app.module('templates')).to.not.be.an('undefined');
+  });
+
+  it('Should render a string', function() {
+    return expect(app.render('rendering is {{status}}', {status: 'working'})).to.eventually.equal('rendering is working');
+  });
+
+  it('Should render a template file', function() {
+    return expect(app.http.getTemplate(
+      window.location.origin + '/xorb/test/fixtures/templates/testTemplate.tpl',
+      undefined,
+      { status: 'working' }
+    )).to.eventually.equal('rendering is working');
+  });
+});
+
+describe('Testing the DOM module', function() {
+  it('Should initialize', function() {
+    return expect(app.module('dom')).to.not.be.an('undefined');
   });
 });
