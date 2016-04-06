@@ -8,7 +8,7 @@ node_js:
   - "4.0"
   - "0.12"
 install:
-  - npm install phantomjs-prebuilt -g
+#  - npm install phantomjs-prebuilt -g
   - npm install -g mocha-phantomjs
   - npm install mocha
   - npm install chai
