@@ -129,12 +129,14 @@ body {
   vertical-align: middle;
 }
 
-#mocha .test.pass.fast .duration {
-  color: #7DC32B;
+#mocha .test.pass.medium .duration {
+  background: #FFB027;
+  color: #fff;
 }
 
-#mocha .test.pending .duration {
-  color: #0b97c4;
+#mocha .test.pass.slow .duration {
+  background: #b94a48;
+  color: #fff;
 }
 
 /*#mocha .test.pass.fast .duration {
