@@ -1,6 +1,6 @@
 # xorb [![Build status](https://travis-ci.org/Radiergummi/xorb.svg)](https://travis-ci.org/Radiergummi/xorb)
 JS client-side framework for a clean, modern and fast app programming approach  
-**Note: Build fails due to Travis/PhantomJS not providing a proper `window.location` object. All tests pass on real clients.**
+**Note: Build fails due to Travis/PhantomJS not providing a proper `window.location` object. All tests pass on real clients. A more-or-less up to date version is available [here](http://xorb.9dev.de/test/testRunner.html).**
 
 ## Contents
 1. [About](#about)
