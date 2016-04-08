@@ -385,15 +385,14 @@ var app = app || (function () {
           var request = {};
 
           request.url = requestData.url;
-          request.method = (requestData.method.hasOwnProperty('method') ? requestData.method : 'GET');
+          request.method = (requestData.hasOwnProperty('method') ? requestData.method : 'GET');
           request.data = (requestData.hasOwnProperty('data') ? requestData.data : undefined);
           request.params = (requestData.hasOwnProperty('params') ? requestData.params : null);
           request.headers = (requestData.hasOwnProperty('headers') ? requestData.headers : {});
           request.callback = (requestData.hasOwnProperty('callback') ? requestData.callback : null);
-          console.log('[app/http] [DEBUG] ', _buildURL(request.url, request.params));
           return (request.data === undefined
-                  ? _adapter.transmit(request)
-                  : _adapter.receive(request)
+                  ? _adapter.receive(request)
+                  : _adapter.transmit(request)
           );
         };
 
