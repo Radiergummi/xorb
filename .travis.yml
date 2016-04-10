@@ -21,7 +21,8 @@ install:
   - npm install chai-as-promised
   
 before_script:
-  - phantomjs --webdriver=4444 &
+  - python -m SimpleHTTPServer &
+  - sleep 2
   - mocha-phantomjs --version
 
 script:
